@@ -1,0 +1,108 @@
+use MyDatabase;
+select * from [dbo].[customers];
+
+-- order and customer last 5 year data 
+select * from [dbo].[orders] b
+join [dbo].[customers] a on a.id=b.customer_id
+where order_date >=dateadd(year,-5,getdate());
+
+-- any unnecessary space column name 
+select trim(column_name) from information_schema.columns;
+
+select * from (select *,rank() over (order by score desc) as rnk 
+from [dbo].[orders])t
+where t.rnk=2;
+
+use salesdb;
+-- Find the products that have a price higher than the average price of all products
+
+select productid, price 
+	from (select productid,price, avg(price) over() as avgprice 
+				from SalesDB.[Sales].[Products])t
+				where price > avgprice;
+use SalesDB;
+select * from (select fullname ,country, total_sales
+, RANK() OVER (ORDER BY total_sales DESC) AS RNK
+from (select CONCAT(C.FIRSTNAME,' ',C.LASTNAME) AS FULLNAME
+, C.COUNTRY, SUM(O.SALES) AS TOTAL_SALES
+from  [Sales].[Customers] as C
+JOIN [Sales].[Orders] O ON O.CUSTOMERID=C.CUSTOMERID
+group by CONCAT(C.FIRSTNAME,' ',C.LASTNAME), C.COUNTRY)as t
+)r 
+where r.rnk=2
+;
+
+-- Rank Customers based on their total amount of sales
+select *, rank() over (order by total_sales desc) as rnk
+from
+		(select customerid
+		,sum(sales) total_sales 
+		from sales.Orders
+		group by CustomerID)t;
+
+--show productid, productnames,prices and total number of orders
+
+select productid,Product,Price
+,(select count(*) from [Sales].[Orders]) as countoforder
+from [Sales].[Products];
+
+-- show all the customer details and find the total order for each customer
+
+select * from [Sales].[Customers] as cust
+	left join (select customerid, count(*) as countoforders from [Sales].[Orders]
+	group by customerid) as ord 
+on ord.customerid = cust.customerid
+;
+
+select * from [Sales].[Products];
+--Find the products that have a price higher than average price of all products
+
+select productid,product,category,price
+,(select avg(price) from [Sales].[Products]) as avg_price
+from [Sales].[Products]
+where price > (select avg(price) from [Sales].[Products])
+;
+
+--Show the details of orders made by customers in Germany
+select * from [Sales].[Orders]
+where CustomerID in 
+				(select CustomerID from [Sales].[Customers] where Country = 'Germany')
+;
+
+--Show the details of orders made by customers who are not in Germany
+select * from [Sales].[Orders]
+where CustomerID not in 
+				(select CustomerID from [Sales].[Customers] where Country = 'Germany')
+;
+
+-- Find female employees whose salaries are greater than 
+--the salaries of any male employees 
+
+select * from [Sales].[Employees]
+where gender='F' and Salary >any(select Salary from [Sales].[Employees] where  gender='M');
+
+-- Find female employee whose salaries are greater than all male employees
+select * from [Sales].[Employees]
+where gender='F' and Salary >all(select Salary from [Sales].[Employees] where  gender='M');
+
+
+-- show all customer details and find the total orders of each customer
+--subqueries
+
+select * from [Sales].[Customers] as cust
+	left join (select customerid, count(*) as countoforders from [Sales].[Orders]
+	group by customerid) as ord 
+on ord.customerid = cust.customerid;
+
+--correlated query
+
+select *
+, (select  count(*)  from [Sales].[Orders] ord 
+where cust.customerid=ord.customerid) as countoforder
+from [Sales].[Customers] as cust;
+
+-- Show the order details for customer in Germany 
+
+select o.* from [Sales].[Orders] o
+where exists (select * from [Sales].[Customers] c where country='Germany' and o.customerid=c.customerid)
+;
