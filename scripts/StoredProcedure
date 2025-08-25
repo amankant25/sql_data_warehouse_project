@@ -58,3 +58,15 @@ GO
 -- EXECUTE STORED PROCEDURE
 --EXEC GETCUSTOMERSUMMARY @Country = 'Germany'
 --EXEC GETCUSTOMERSUMMARY 
+
+
+--PARAMETER 
+-- PLACEHOLDER USED TO PASS VALUES AS INPUT FROM THE CALLER TO THE PROCEDURE 
+--ALLOWING DYNAMIC DATA TO BE PROCESSED 
+
+--Variable
+--Placeholders used to store values to be used later in the procedure
+
+--begin try end try "might cause an error"
+--begin catch end catch "statement to handle error"
+
