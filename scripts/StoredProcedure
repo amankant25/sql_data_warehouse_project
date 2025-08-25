@@ -1,0 +1,60 @@
+  alter PROCEDURE GETCUSTOMERSUMMARY @Country nvarchar(50) = 'USA' AS 
+BEGIN
+	BEGIN TRY
+		DECLARE @TotalCustomers INT, @AverageScore FLOAT, @totalorder INT, @totalsales INT
+--###################################################		
+		--sTEP 1 : Prepare & cleanup Data
+--###################################################		
+		if exists (select 1 from SalesDB.Sales.Customers where Score IS NULL AND Country=@Country)
+		begin
+		PRINT('Updating NUll Score to zero')
+		update SalesDB.Sales.Customers
+		set Score=0
+		where Score IS NULL and Country = @Country;
+		end
+
+		else
+		begin
+		print('No NULL Values found');
+		end;
+--#################################################
+		-- step2 : Generating Reports
+--#################################################
+		select 
+			@TotalCustomers = count(*),
+			@AverageScore = avg(Score)
+		from [SalesDB].[Sales].[Customers]
+		where country = @Country;
+
+		print 'Total Customer from : '+@Country+' : '+CAST(@TotalCustomers AS VARCHAR);
+		print 'Average Score from : '+@Country+ ' : '+CAST(@AverageScore AS VARCHAR);
+
+		--Find the total number of orders and total sales 
+		select 
+			 count(*) as total_orders
+			,sum(sales) as Total_Sales
+			,1/0
+		from  [SalesDB].[Sales].[Orders] o
+		join  [SalesDB].[Sales].[Customers] c on c.CustomerID=o.CustomerID
+		where c.country=@Country;
+
+		--PRINT 'Total Order from ' +@Country+' : '+CAST(@totalorder AS VARCHAR);
+		--PRINT 'Total Sales from ' +@Country+' : '+CAST(@totalsales AS VARCHAR);
+	END TRY
+	BEGIN CATCH
+	--###########################
+	-- Error handling 
+	--###########################
+		PRINT('Error Occured :');
+		PRINT('Error Messages : '+Error_message());
+		print('Error Number '+CAST(ERROR_NUMBER() AS NVARCHAR));
+		PRINT('Error Line: '+ CAST(ERROR_LINE() AS NVARCHAR));
+		PRINT('Error Procedure: '+Error_procedure());
+	END CATCH
+END
+GO
+
+
+-- EXECUTE STORED PROCEDURE
+--EXEC GETCUSTOMERSUMMARY @Country = 'Germany'
+--EXEC GETCUSTOMERSUMMARY 
