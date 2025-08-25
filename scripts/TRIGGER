@@ -1,0 +1,23 @@
+--trigger
+--special stored procedure (set of statements) that automatically run in response to a specific event on a table or view
+-- Trigger Type (DML-Insert,Update,Delete),(DDL -  Create,Alter,Drop), (LOGON)
+-- DML - (AFTER(RUN After Event), INSTEAD OF(run during event))
+
+
+--CREATE TRIGGER TRIGGER NAME ON TABLE NAME
+
+--WHEN ---> AFTER INSERT UPDATE DELETE 
+
+--BEGIN 
+
+--END
+
+create trigger trg_afterinsertemployee on [Sales].[Employees]
+AFTER INSERT AS
+	BEGIN
+		INSERT INTO [Sales].[EmployeeLogs] ([EmployeeID],[LogMessage], [LogDate])
+		SELECT EMPLOYEEID,
+			   'NEW EMPLOYEE ADDED = '+ CAST(EMPLOYEEID AS VARCHAR),
+				GETDATE()
+		FROM inserted
+	END
