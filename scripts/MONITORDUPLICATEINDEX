@@ -14,3 +14,22 @@ JOIN SYS.index_columns IC ON IC.object_id = IDX.object_id AND IDX.index_id=IC.in
 JOIN SYS.COLUMNS COL ON COL.OBJECT_ID=IC.object_id AND COL.column_id=IC.column_id
 ORDER BY COUNTNAME DESC
 ;
+
+WITH IndexUsage AS (
+    SELECT 
+        T.NAME AS TABLENAME,
+        COL.NAME AS INDEXCOLUMN,
+        IDX.NAME AS INDEXNAME,
+        IDX.type_desc AS INDEXTYPE,
+        COUNT(*) OVER (PARTITION BY T.NAME, COL.NAME) AS COUNTNAME
+    FROM 
+        SYS.INDEXES IDX
+    JOIN SYS.TABLES T ON T.OBJECT_ID = IDX.OBJECT_ID
+    JOIN SYS.index_columns IC ON IC.object_id = IDX.object_id AND IDX.index_id = IC.index_ID
+    JOIN SYS.COLUMNS COL ON COL.OBJECT_ID = IC.object_id AND COL.column_id = IC.column_id
+)
+SELECT *
+FROM IndexUsage
+;
+
+
