@@ -1,0 +1,34 @@
+UNIQUE INDEX
+
+ENSURE NO DUPLICATEVALUE EXIST IN SPECIFIC COLUMN
+BENEFITS 
+1. ENFORCE UNIQUENESS
+2. SLIGHTLY INCREASE QUERY PERFORMANCE
+
+SYNTAX
+CREATE (DEFAULT IT IS NOT UNIQUE) UNIQUE CLUSTERED | NONCLUSTERED ROWSTORE | COLUMNSTORE INDEX INDEX_NAME ON TABLE_NAME (COL1, CLO2)
+
+
+--EXAMPLE
+
+USE SALESDB;
+
+CREATE UNIQUE NONCLUSTERED INDEX IDX_SALESPRODUCT_CATEGORY ON  [Sales].[Products](CATGEGORY);
+
+--------------------------
+-----------ERROR----------
+--Msg 1911, Level 16, State 1, Line 3
+--Column name 'CATGEGORY' does not exist in the target table or view.
+--------------------------
+
+CREATE UNIQUE NONCLUSTERED INDEX IDX_SALESPRODUCT_PRODUCT ON  [Sales].[Products](PRODUCT);
+
+SELECT * FROM SalesDB.Sales.Products;
+
+INSERT INTO SalesDB.Sales.Products (pRODUCTID,PRODUCT)
+VALUES (106,'Tire');
+
+----ERROR
+--Msg 2601, Level 14, State 1, Line 19
+--Cannot insert duplicate key row in object 'Sales.Products' with unique index 'IDX_SALESPRODUCT_PRODUCT'. The duplicate key value is (Tire).
+--- ERROR
