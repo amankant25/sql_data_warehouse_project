@@ -1,0 +1,59 @@
+SP_HELPINDEX 'TABLE_NAME';
+
+SELECT * FROM SYS.INDEXES;
+
+USE SALESDB;
+
+CREATE UNIQUE NONCLUSTERED INDEX IDX_SALESPRODUCT_CATEGORY ON  [Sales].[Products](CATGEGORY);
+
+--------------------------
+-----------ERROR----------
+
+
+--Msg 1911, Level 16, State 1, Line 3
+--Column name 'CATGEGORY' does not exist in the target table or view.
+
+--------------------------
+
+CREATE UNIQUE NONCLUSTERED INDEX IDX_SALESPRODUCT_PRODUCT ON  [Sales].[Products](PRODUCT);
+
+SELECT * FROM SalesDB.Sales.Products;
+
+INSERT INTO SalesDB.Sales.Products (pRODUCTID,PRODUCT)
+VALUES (106,'Tire');
+
+----ERROR
+--Msg 2601, Level 14, State 1, Line 19
+--Cannot insert duplicate key row in object 'Sales.Products' with unique index 'IDX_SALESPRODUCT_PRODUCT'. The duplicate key value is (Tire).
+--- ERROR
+
+
+SELECT * FROM Sales.Customers
+WHERE COUNTRY ='USA';
+
+CREATE NONCLUSTERED INDEX IDX_SALESCUSTOMERUSA ON Sales.Customers
+(COUNTRY)
+WHERE COUNTRY = 'USA'
+
+
+SP_HELPINDEX 'Sales.Customers';
+
+SELECT IDX.OBJECT_ID AS ID
+, IDX.NAME AS INDEXNAME
+, IDX.type_desc AS INDEXTYPE 
+,IS_PRIMARY_KEY AS ISPRIMARYKEY
+,IS_UNIQUE AS ISUNIQUEKEY
+,IS_DISABLED AS ISDISABLED
+,T.NAME AS TABLENAME
+,S.USER_SEEKS
+,S.user_scans
+,S.USER_LOOKUPS
+,S.USER_UPDATES
+,COALESCE(S.LAST_USER_SEEK,S.LAST_USER_SCAN) LASTUPDATE
+FROM SYS.INDEXES IDX
+JOIN SYS.tables T ON T.object_id=IDX.object_id
+LEFT JOIN SYS.dm_db_index_usage_stats S ON S.OBJECT_ID=IDX.OBJECT_ID AND S.INDEX_ID=IDX.INDEX_ID;
+SELECT * FROM SYS.tables;
+
+SELECT * FROM SYS.dm_db_index_usage_stats
+ORDER BY index_id;
