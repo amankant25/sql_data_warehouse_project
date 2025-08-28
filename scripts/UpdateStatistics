@@ -15,3 +15,6 @@ ORDER BY SP.MODIFICATION_COUNTER DESC;
 update statistics [SalesDB].[Sales].[Customers] _WA_Sys_00000005_35BCFE0A;
 
 update statistics [SalesDB].[Sales].[Customers];
+
+
+exec sp_updatestats;
