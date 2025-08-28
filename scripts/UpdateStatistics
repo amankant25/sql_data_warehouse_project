@@ -1,0 +1,17 @@
+SELECT 
+		SCHEMA_NAME (T.SCHEMA_ID) AS SchemaName,
+		t.name as TableName,
+		s.name as StatisticName,
+		sp.last_updated as LastUpdate,
+		datediff(day,SP.last_updated,getdate()) AS LastUpdateDay, 
+		sp.rows as Rows,
+		sp.modification_counter as ModificationsinceLastUpdate
+FROM SYS.STATS AS S
+JOIN SYS.TABLES T ON S.OBJECT_ID = T.OBJECT_ID
+CROSS APPLY SYS.dm_db_stats_properties(S.object_id,S.STATS_ID) AS SP
+ORDER BY SP.MODIFICATION_COUNTER DESC;
+
+
+update statistics [SalesDB].[Sales].[Customers] _WA_Sys_00000005_35BCFE0A;
+
+update statistics [SalesDB].[Sales].[Customers];
