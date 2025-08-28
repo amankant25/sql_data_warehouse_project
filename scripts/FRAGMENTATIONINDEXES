@@ -1,0 +1,41 @@
+FRAGMENTATION 
+
+UNUSED SPACES IN DATA PAGES
+DATA PAGES ARE OUT OF ORDER
+
+
+REORGANIZE
+DEFRAGMENT THE LEAF NODE TO KEEP SORTED
+LIGHHT OPERATION
+REBUILD
+RECREATE INDEX FROM THE SCRATCH
+HEAVY OPERATION
+
+
+
+
+SELECT * FROM SYS.dm_db_index_physical_stats 
+(DB_ID() --Gets the ID of the current database.
+,NULL --Includes all tables and views.
+,NULL --Includes all indexes.
+,NULL -- Includes all partitions.
+,'LIMITED' -- Uses a fast scan mode that gives basic fragmentation info without scanning the entire index (less resource-intensive).
+);
+
+SELECT 
+	T.NAME,
+	IDX.NAME AS INDEXNAME,
+	S.avg_fragmentation_in_percent,
+	S.PAGE_COUNT
+FROM SYS.dm_db_index_physical_stats(DB_ID(),NULL,NULL,NULL,'LIMITED') S
+INNER JOIN SYS.TABLES T ON T.OBJECT_ID = S.OBJECT_ID
+INNER JOIN SYS.INDEXES IDX ON S.OBJECT_ID = IDX.object_id 
+ORDER BY S.avg_fragmentation_in_percent DESC;
+
+
+--IF AVG FRAGMENTATION IS GREATER THAN 30% THEN REORGANIZE
+ALTER INDEX IDX_DBCUSTOMERS_FIRSTNAME ON SALES.CUSTOMERS REORGANIZE
+--IF AVG FRAGMENTATION IS GREATER THAN 50% THEN REBUILD
+ALTER INDEX IDX_DBCUSTOMERS_LASTNAME ON SALES.CUSTOMERS REBUILD
+
+
