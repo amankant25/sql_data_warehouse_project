@@ -1,0 +1,15 @@
+truncate table silver.[crm_cust_info];
+
+insert into silver.[crm_cust_info] 
+select cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date 
+from (select cst_id,cst_key,cst_firstname,cst_lastname,
+case when cst_marital_status ='S' then 'Single'
+	when cst_marital_status = 'M' then 'Married'
+	else '' end as cst_marital_status,
+case when cst_gndr ='F' then 'Female'
+	when cst_gndr = 'M' then 'Male'
+	else '' end as cst_gndr,
+	cst_create_date,
+	ROW_NUMBER() over (partition by cst_id order by cst_create_date desc) as latestflag
+	from [bronze].[crm_cust_info])t
+where cst_id is not null and latestflag =1;
