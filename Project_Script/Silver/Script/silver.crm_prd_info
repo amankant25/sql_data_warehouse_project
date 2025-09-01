@@ -1,0 +1,21 @@
+if OBJECT_ID('silver.crm_prd_info','U') IS NOT NULL
+DROP TABLE [silver].[crm_prd_info];
+create table [silver].[crm_prd_info](Prd_ID int, Cat_ID nvarchar(50),Prd_Key nvarchar(50),Prd_Nm nvarchar(50),Prd_cost int,Prd_line nvarchar(50),Prd_Start_Dt date,Prd_End_Dt date,dwh_create_date datetime2 default getdate());
+
+TRUNCATE TABLE [silver].[crm_prd_info];
+INSERT INTO [silver].[crm_prd_info] 
+	(Prd_ID,Cat_ID,Prd_Key,Prd_Nm,Prd_cost,Prd_line,Prd_Start_Dt,Prd_End_Dt)
+SELECT
+	PRD_ID,
+	replace(SUBSTRING(prd_key,1,5),'-','_') cat_id,
+	SUBSTRING(PRD_KEY,7,LEN(PRD_KEY)) prd_key,
+	prd_nm,
+	coalesce(prd_cost,0) prd_cost,
+	CASE when UPPER(TRIM(prd_line)) = 'M' then 'Mountain'
+		WHEN UPPER(TRIM(PRD_LINE)) = 'R' THEN 'Road'
+		when UPPER(TRIM(prd_line)) = 'S' then 'Other Sales'
+		WHEN UPPER(TRIM(PRD_LINE)) = 'T' THEN 'Touring'
+		else 'n/a' end prd_line,
+	 CAST(prd_start_dt AS DATE) prd_start_dt, 
+	 CAST(DATEADD(DAY,-1,LEAD(prd_start_dt) OVER (PARTITION BY PRD_KEY ORDER BY prd_start_dt)) AS DATE) as prd_end_dt
+FROM [bronze].[crm_prd_info];
